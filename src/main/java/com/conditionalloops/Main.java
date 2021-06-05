@@ -19,7 +19,7 @@ public final class Main {
    * @param args
    */
   public static void main(final String... args) {
-    Window window = Window.getWindow();
+    Window window = Window.get();
     window.run();
   }
 

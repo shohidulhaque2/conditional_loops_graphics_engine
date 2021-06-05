@@ -29,6 +29,11 @@ import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import com.conditionalloops.graphics_engine.scene.LevelEditorScene;
+import com.conditionalloops.graphics_engine.scene.LevelScene;
+import com.conditionalloops.graphics_engine.scene.Scene;
+import com.conditionalloops.graphics_engine.scene.SceneType;
+import com.conditionalloops.graphics_engine.time.Time;
 import java.util.Objects;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -40,11 +45,13 @@ import org.slf4j.LoggerFactory;
  */
 public class Window {
 
+
+
   private final static org.slf4j.Logger Logger = LoggerFactory
       .getLogger(com.conditionalloops.graphics_engine.Window.class);
   private static final Object Lock = new Object();
 
-  private static Window Window;
+  private static Window instance;
   private final int width;
   private final int height;
 
@@ -52,9 +59,27 @@ public class Window {
 
   private long glfwWindow;
 
-  private float r, g, b, a;
+  public float r, g, b, a;
 
-  private boolean fadeToBack;
+
+  private static Scene currentScene;
+
+  public static void changeScene(int newSceneId){
+
+    switch (newSceneId){
+
+      case SceneType.SceneTypeId.LevelEditorSceneTypeId:
+        currentScene = new LevelEditorScene();
+        break;
+      case  SceneType.SceneTypeId.LevelSceneTypeId:
+        currentScene = new LevelScene();
+        break;
+      default:
+        Logger.error("Unknown scene id : {}", newSceneId );
+        assert false : "Unknown scene id : " + newSceneId;
+    }
+
+  }
 
   private Window() {
     this.width = 1920;
@@ -69,16 +94,16 @@ public class Window {
   /**
    * @return
    */
-  public static Window getWindow() {
+  public static Window get() {
 
-    if (Objects.isNull(Window)) {
+    if (Objects.isNull(instance)) {
       synchronized (Lock) {
-        if (Objects.isNull(Window)) {
-          Window = new Window();
+        if (Objects.isNull(instance)) {
+          instance = new Window();
         }
       }
     }
-    return Window;
+    return instance;
   }
 
   /**
@@ -132,29 +157,29 @@ public class Window {
 
     GL.createCapabilities();
 
+    Window.changeScene(SceneType.SceneTypeId.LevelEditorSceneTypeId);
+
   }
 
   private void loop() {
     Logger.debug("attempting to start LWJGL event loop.");
+    float beginTime = Time.getTime();
+    float dTime = 0;
     while (!glfwWindowShouldClose(this.glfwWindow)) {
       glfwPollEvents();
 
       glClearColor(this.r, this.g, this.b, this.a);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      if(this.fadeToBack){
-        this.r = Math.max(this.r - 0.01f, 0);
-        this.g = Math.max(this.g - 0.01f, 0);
-        this.b = Math.max(this.b - 0.01f, 0);
-        this.a = Math.max(this.a - 0.01f, 0);
-      }
-
-      if(KeyListener.isKeyPressed(GLFW_KEY_SPACE)){
-        Logger.debug("Space Key has been pressed.");
-        this.fadeToBack = true;
+      if(dTime > 0) {
+        currentScene.update(dTime);
       }
 
       glfwSwapBuffers(glfwWindow);
+
+      final float endTime = Time.getTime();
+      dTime = endTime - beginTime;
+      beginTime = endTime;
     }
   }
 
