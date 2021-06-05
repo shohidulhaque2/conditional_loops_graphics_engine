@@ -1,31 +1,17 @@
-
-<!-- this file goes in src/main/resources/logback.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <!-- if the system property LOCAL is defined, we'll use a human-friendly log format -->
-  <if condition='isDefined("LOCAL")'>
-    <then>
-      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-          <pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-      </appender>
-    </then>
-    <else>
-      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-          <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
-            <appendLineSeparator>true</appendLineSeparator>
-            <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter" />
-          </layout>
-        </encoder>
-      </appender>
-    </else>
-  </if>
 
-  <!-- overriding the default log level per class / package -->
-  <!-- <logger name="com.example" level="INFO" /> -->
+  <!-- Send debug messages to System.out -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+    </encoder>
+  </appender>
 
-  <root level="INFO">
+
+  <!-- By default, the level of the root level is set to DEBUG -->
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

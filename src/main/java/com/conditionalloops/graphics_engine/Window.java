@@ -2,6 +2,7 @@ package com.conditionalloops.graphics_engine;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_MAXIMIZED;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -12,7 +13,11 @@ import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
@@ -47,10 +52,18 @@ public class Window {
 
   private long glfwWindow;
 
+  private float r, g, b, a;
+
+  private boolean fadeToBack;
+
   private Window() {
     this.width = 1920;
     this.height = 1080;
     this.title = "Conditional Loops Game Engine";
+    this.r = 1;
+    this.g = 1;
+    this.b = 1;
+    this.a = 1;
   }
 
   /**
@@ -107,6 +120,11 @@ public class Window {
       throw new IllegalStateException("Failed to create GLFW window.");
     }
 
+    glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePosCallback);
+    glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
+    glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallBack);
+
+    glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
     glfwMakeContextCurrent(this.glfwWindow);
     glfwSwapInterval(1);
 
@@ -120,8 +138,22 @@ public class Window {
     Logger.debug("attempting to start LWJGL event loop.");
     while (!glfwWindowShouldClose(this.glfwWindow)) {
       glfwPollEvents();
-      glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+      glClearColor(this.r, this.g, this.b, this.a);
       glClear(GL_COLOR_BUFFER_BIT);
+
+      if(this.fadeToBack){
+        this.r = Math.max(this.r - 0.01f, 0);
+        this.g = Math.max(this.g - 0.01f, 0);
+        this.b = Math.max(this.b - 0.01f, 0);
+        this.a = Math.max(this.a - 0.01f, 0);
+      }
+
+      if(KeyListener.isKeyPressed(GLFW_KEY_SPACE)){
+        Logger.debug("Space Key has been pressed.");
+        this.fadeToBack = true;
+      }
+
       glfwSwapBuffers(glfwWindow);
     }
   }
