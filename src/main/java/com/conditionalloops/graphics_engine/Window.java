@@ -80,6 +80,7 @@ public class Window {
   }
 
   private void clean() {
+    Logger.debug("cleaning LWJGL resources.");
     // Free the window callbacks and destroy the window
     glfwFreeCallbacks(glfwWindow);
     glfwDestroyWindow(glfwWindow);
@@ -88,8 +89,6 @@ public class Window {
     glfwTerminate();
     glfwSetErrorCallback(null).free();
   }
-
-
 
   private void init() {
     GLFWErrorCallback.createPrint(System.err).set();
@@ -118,6 +117,7 @@ public class Window {
   }
 
   private void loop() {
+    Logger.debug("attempting to start LWJGL event loop.");
     while (!glfwWindowShouldClose(this.glfwWindow)) {
       glfwPollEvents();
       glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
